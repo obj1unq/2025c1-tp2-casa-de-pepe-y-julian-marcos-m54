@@ -1,0 +1,73 @@
+import casa.*
+import cosas.*
+import cuentas.*
+
+describe "Casa de Pepe y Julian - administracion de los gastos de la casa" {
+  test "Compra de muebles y electrodomesticos para la casa" {
+    casaDePepeYJulian.cuentaBancaria().saldo(29200)
+    casaDePepeYJulian.comprar(heladera)
+    casaDePepeYJulian.comprar(cama)
+    casaDePepeYJulian.comprar(plancha)
+    assert.equals([heladera, cama, plancha], casaDePepeYJulian.cosasCompradas())
+    assert.equals(3, casaDePepeYJulian.cantidadDeCosasCompradas())
+    
+    assert.that(casaDePepeYJulian.tieneAlgun(electrodomestico))
+    assert.that(casaDePepeYJulian.tieneAlgun(mueble))
+    assert.notThat(casaDePepeYJulian.tieneAlgun(comida))
+    
+    assert.that(casaDePepeYJulian.vieneDeComprar(electrodomestico))
+    assert.notThat(casaDePepeYJulian.vieneDeComprar(mueble))
+    
+    assert.equals(29200, casaDePepeYJulian.dineroGastado())
+    assert.that(casaDePepeYJulian.esDerrochona())
+    
+    assert.equals(
+      [heladera, plancha],
+      casaDePepeYJulian.comprados(electrodomestico)
+    )
+    assert.equals([cama], casaDePepeYJulian.comprados(mueble))
+    assert.equals([], casaDePepeYJulian.comprados(comida))
+    
+    assert.notThat(casaDePepeYJulian.malaEpoca())
+    
+    assert.equals(
+      [tiraDeAsado, paqueteDeFideos],
+      casaDePepeYJulian.queFaltaComprar([tiraDeAsado, plancha, paqueteDeFideos])
+    )
+    
+    assert.equals(0, casaDePepeYJulian.cantidadComidaComprada())
+    assert.that(casaDePepeYJulian.faltaComida())
+    
+    assert.equals(
+      [electrodomestico, mueble],
+      casaDePepeYJulian.categoriasCompradas()
+    )
+  }
+  
+  test "Cuentas bancarias - cuenta corriente y cuenta con gastos" {
+    cuentaCorriente.saldo(20)
+    cuentaCorriente.depositar(1000)
+    assert.equals(1020, cuentaCorriente.saldo())
+    cuentaCorriente.extraer(50)
+    assert.equals(970, cuentaCorriente.saldo())
+    assert.throwsException({ cuentaCorriente.extraer(2000) })
+    
+    cuentaConGastos.saldo(500)
+    cuentaConGastos.costo(20)
+    cuentaConGastos.depositar(1000)
+    assert.equals(1480, cuentaConGastos.saldo())
+    cuentaConGastos.extraer(30)
+    assert.equals(1450, cuentaConGastos.saldo())
+    assert.throwsException({ cuentaConGastos.depositar(2000) })
+    assert.equals(1450, cuentaConGastos.saldo())
+    cuentaConGastos.extraer(2000)
+    assert.equals(-550, cuentaConGastos.saldo())
+  }
+  
+  test "Compra de cosas y como afectan a la cuenta bancaria elegida previamente por la casa" {
+    cuentaCorriente.saldo(1000)
+    casaDePepeYJulian.comprar(tiraDeAsado)
+    casaDePepeYJulian.comprar(paqueteDeFideos)
+    assert.equals(600, casaDePepeYJulian.saldo())
+  }
+}
